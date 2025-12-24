@@ -4,6 +4,8 @@ A beautiful, professional serial console application built with Electron and Typ
 
 ![Serial Console Pro](https://img.shields.io/badge/Electron-28.0-blue) ![TypeScript](https://img.shields.io/badge/TypeScript-5.3-blue)
 
+![Serial Console Pro](screenshots/serial-console-pro.png)
+
 ## Features
 
 ### Core Functionality

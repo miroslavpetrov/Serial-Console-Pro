@@ -16,10 +16,12 @@
     "mac": {
       "category": "public.app-category.developer-tools",
       "target": "dir",
-      "hardenedRuntime": true,
+      "hardenedRuntime": false,
       "gatekeeperAssess": false,
       "entitlements": "build/entitlements.mac.plist",
-      "entitlementsInherit": "build/entitlements.mac.plist"
+      "entitlementsInherit": "build/entitlements.mac.plist",
+      "identity": null,
+      "icon": "build/icons/icon.icns"
     },
     "files": [
       "dist/**/*"
