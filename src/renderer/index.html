@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com">
+  <title>Serial Console Pro</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app-container">
+    <!-- Header -->
+    <header class="app-header">
+      <div class="header-content">
+        <h1><span class="material-symbols-outlined" style="vertical-align: middle; font-size: 24px;">cable</span> Serial Console Pro</h1>
+        <div class="connection-status">
+          <span class="status-indicator" id="statusIndicator"></span>
+          <span id="statusText">Disconnected</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Content -->
+    <div class="main-content">
+      <!-- Sidebar -->
+      <aside class="sidebar">
+        <div class="panel">
+          <div class="panel-header">
+            <h3><span class="material-symbols-outlined">settings_input_component</span> Port Configuration</h3>
+            <button class="btn-icon" id="refreshPorts" title="Refresh ports"><span class="material-symbols-outlined">refresh</span></button>
+          </div>
+          
+          <div class="form-group">
+            <label>Port</label>
+            <select id="portSelect">
+              <option value="">Select a port...</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Baud Rate</label>
+            <select id="baudRate">
+              <option value="300">300</option>
+              <option value="1200">1,200</option>
+              <option value="2400">2,400</option>
+              <option value="4800">4,800</option>
+              <option value="9600" selected>9,600</option>
+              <option value="14400">14,400</option>
+              <option value="19200">19,200</option>
+              <option value="28800">28,800</option>
+              <option value="38400">38,400</option>
+              <option value="57600">57,600</option>
+              <option value="115200">115,200</option>
+              <option value="230400">230,400</option>
+              <option value="460800">460,800</option>
+              <option value="921600">921,600</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Data Bits</label>
+            <select id="dataBits">
+              <option value="5">5</option>
+              <option value="6">6</option>
+              <option value="7">7</option>
+              <option value="8" selected>8</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Stop Bits</label>
+            <select id="stopBits">
+              <option value="1" selected>1</option>
+              <option value="2">2</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Parity</label>
+            <select id="parity">
+              <option value="none" selected>None</option>
+              <option value="even">Even</option>
+              <option value="odd">Odd</option>
+              <option value="mark">Mark</option>
+              <option value="space">Space</option>
+            </select>
+          </div>
+
+          <button class="btn btn-primary" id="connectBtn">Connect</button>
+          <button class="btn btn-danger" id="disconnectBtn" disabled>Disconnect</button>
+        </div>
+
+        <div class="panel">
+          <div class="panel-header">
+            <h3><span class="material-symbols-outlined">insights</span> Statistics</h3>
+          </div>
+          <div class="stats">
+            <div class="stat-item">
+              <span class="stat-label">Received:</span>
+              <span class="stat-value" id="rxCount">0 bytes</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-label">Sent:</span>
+              <span class="stat-value" id="txCount">0 bytes</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-label">Uptime:</span>
+              <span class="stat-value" id="uptime">00:00:00</span>
+            </div>
+          </div>
+        </div>
+      </aside>
+
+      <!-- Terminal Area -->
+      <main class="terminal-container">
+        <div class="terminal-header">
+          <div class="terminal-actions">
+            <button class="icon-toggle-btn" id="showTimestamps" title="Toggle timestamps">
+              <span class="material-symbols-outlined">schedule</span>
+            </button>
+            <button class="icon-toggle-btn" id="enableLogging" title="Toggle logging">
+              <span class="material-symbols-outlined">fiber_manual_record</span>
+            </button>
+            <button class="btn-icon" id="clearTerminal" title="Clear terminal"><span class="material-symbols-outlined">delete</span></button>
+            <button class="btn-icon" id="toggleAutoscroll" title="Toggle autoscroll"><span class="material-symbols-outlined">vertical_align_bottom</span></button>
+          </div>
+        </div>
+
+        <div class="terminal" id="terminal">
+          <div class="terminal-line info">
+            <span class="content">Serial Console Pro - Select a port and click Connect to start</span>
+          </div>
+        </div>
+
+        <div class="input-area">
+          <div class="input-controls">
+            <div class="format-toggle">
+              <button class="format-btn active" data-format="ascii">ASCII</button>
+              <button class="format-btn" data-format="hex">HEX</button>
+            </div>
+            <div class="send-options">
+              <button class="option-btn" id="addNewline" title="Add CR+LF">CR</button>
+              <button class="option-btn" id="echoLocal" title="Local Echo">Echo</button>
+            </div>
+          </div>
+          
+          <div class="input-row">
+            <input 
+              type="text" 
+              id="dataInput" 
+              placeholder="Enter data to send..." 
+              disabled
+            >
+            <button class="btn-send" id="sendBtn" disabled>Send</button>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <script src="renderer.js"></script>
+</body>
+</html>

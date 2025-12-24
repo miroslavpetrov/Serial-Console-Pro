@@ -1,0 +1,48 @@
+{
+  "name": "serial-console-pro",
+  "version": "1.0.0",
+  "description": "A beautiful serial console application",
+  "main": "dist/main/index.js",
+  "scripts": {
+    "build": "tsc && npm run copy-assets",
+    "copy-assets": "cp src/renderer/index.html dist/renderer/ && cp src/renderer/styles.css dist/renderer/",
+    "start": "npm run build && electron .",
+    "dev": "tsc && electron .",
+    "dist": "npm run build && electron-builder --mac"
+  },
+  "build": {
+    "appId": "com.serialconsole.pro",
+    "productName": "Serial Console Pro",
+    "mac": {
+      "category": "public.app-category.developer-tools",
+      "target": "dir",
+      "hardenedRuntime": true,
+      "gatekeeperAssess": false,
+      "entitlements": "build/entitlements.mac.plist",
+      "entitlementsInherit": "build/entitlements.mac.plist"
+    },
+    "files": [
+      "dist/**/*"
+    ],
+    "directories": {
+      "output": "release"
+    },
+    "asar": false
+  },
+  "keywords": [
+    "electron",
+    "serial",
+    "console"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^20.10.5",
+    "electron": "^28.0.0",
+    "electron-builder": "^26.0.12",
+    "typescript": "^5.3.3"
+  },
+  "dependencies": {
+    "serialport": "^13.0.0"
+  }
+}
