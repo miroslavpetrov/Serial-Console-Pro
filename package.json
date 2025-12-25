@@ -8,7 +8,10 @@
     "copy-assets": "cp src/renderer/index.html dist/renderer/ && cp src/renderer/styles.css dist/renderer/",
     "start": "npm run build && electron .",
     "dev": "tsc && electron .",
-    "dist": "npm run build && electron-builder --mac"
+    "dist": "npm run build && electron-builder --mac --win --linux",
+    "dist:mac": "npm run build && electron-builder --mac",
+    "dist:win": "npm run build && electron-builder --win",
+    "dist:linux": "npm run build && electron-builder --linux"
   },
   "build": {
     "appId": "com.serialconsole.pro",
@@ -22,6 +25,15 @@
       "entitlementsInherit": "build/entitlements.mac.plist",
       "identity": null,
       "icon": "build/icons/icon.icns"
+    },
+    "win": {
+      "target": ["nsis", "zip"],
+      "icon": "build/icons/icon.ico"
+    },
+    "linux": {
+      "target": ["AppImage", "deb"],
+      "icon": "build/icons",
+      "category": "Development"
     },
     "files": [
       "dist/**/*"
