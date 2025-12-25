@@ -16,6 +16,7 @@
   "build": {
     "appId": "com.serialconsole.pro",
     "productName": "Serial Console Pro",
+    "publish": null,
     "mac": {
       "category": "public.app-category.developer-tools",
       "target": "dir",
