@@ -48,7 +48,10 @@
     "serial",
     "console"
   ],
-  "author": "Miroslav Petrov miroslav.petrov@miralabs.bg",
+  "author": {
+    "name": "Miroslav Petrov",
+    "email": "miroslav.petrov@miralabs.bg"
+  },
   "license": "MIT",
   "devDependencies": {
     "@types/node": "^20.10.5",
