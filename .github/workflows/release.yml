@@ -47,6 +47,7 @@ jobs:
           zip -r ../../Serial.Console.Pro-macOS.zip "Serial Console Pro.app"
       
       - name: Upload Release Assets
+        if: startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v1
         with:
           files: |
