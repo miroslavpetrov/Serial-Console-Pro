@@ -1,6 +1,6 @@
 {
   "name": "serial-console-pro",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A beautiful serial console application",
   "main": "dist/main/index.js",
   "scripts": {
@@ -28,7 +28,16 @@
       "icon": "build/icons/icon.icns"
     },
     "win": {
-      "target": ["nsis", "zip"],
+      "target": [
+        {
+          "target": "nsis",
+          "arch": ["x64"]
+        },
+        {
+          "target": "zip",
+          "arch": ["x64"]
+        }
+      ],
       "icon": "build/icons/icon.ico"
     },
     "linux": {
