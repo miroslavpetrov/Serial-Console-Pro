@@ -107,11 +107,13 @@ function setupEventListeners() {
 
   // Option buttons (CR and Echo)
   elements.addNewline.addEventListener('click', () => {
-    elements.addNewline.classList.toggle('active');
+    const isActive = elements.addNewline.classList.toggle('active');
+    window.electronAPI.updateMenuChecked('Settings', 'CR+LF', isActive);
   });
 
   elements.echoLocal.addEventListener('click', () => {
-    elements.echoLocal.classList.toggle('active');
+    const isActive = elements.echoLocal.classList.toggle('active');
+    window.electronAPI.updateMenuChecked('Settings', 'Echo Local', isActive);
   });
 
   // Enter key to send
@@ -137,6 +139,51 @@ function setupSerialListeners() {
   window.electronAPI.serial.onPortClosed(() => {
     handleDisconnect();
     addTerminalLine('Port closed unexpectedly', 'warning');
+  });
+
+  // Menu event listeners
+  window.electronAPI.onMenuEvent('menu:clear-terminal', () => {
+    clearTerminal();
+  });
+
+  window.electronAPI.onMenuEvent('menu:toggle-autoscroll', (enabled: boolean) => {
+    autoscroll = enabled;
+    elements.toggleAutoscroll.classList.toggle('active', enabled);
+  });
+
+  window.electronAPI.onMenuEvent('menu:toggle-timestamps', (enabled: boolean) => {
+    showTimestamps = enabled;
+    elements.showTimestamps.classList.toggle('active', enabled);
+    elements.terminal.classList.toggle('show-timestamps', enabled);
+  });
+
+  window.electronAPI.onMenuEvent('menu:set-format', (format: 'ascii' | 'hex') => {
+    currentFormat = format;
+    document.querySelectorAll('.format-btn').forEach(btn => {
+      btn.classList.toggle('active', btn.getAttribute('data-format') === format);
+    });
+  });
+
+  window.electronAPI.onMenuEvent('menu:toggle-newline', (enabled: boolean) => {
+    elements.addNewline.classList.toggle('active', enabled);
+  });
+
+  window.electronAPI.onMenuEvent('menu:toggle-echo', (enabled: boolean) => {
+    elements.echoLocal.classList.toggle('active', enabled);
+  });
+
+  window.electronAPI.onMenuEvent('menu:toggle-logging', (enabled: boolean) => {
+    enableLogging = enabled;
+    elements.enableLogging.classList.toggle('active', enabled);
+    if (enabled) {
+      elements.enableLogging.classList.add('recording');
+      addTerminalLine('File logging enabled', 'info');
+    } else {
+      elements.enableLogging.classList.remove('recording');
+      if (logLines.length > 0) {
+        downloadLog();
+      }
+    }
   });
 }
 
@@ -233,7 +280,7 @@ async function sendData() {
   const input = elements.dataInput.value;
   if (!input) return;
 
-  let data: Buffer;
+  let dataArray: number[];
 
   if (currentFormat === 'hex') {
     // Parse hex string
@@ -242,24 +289,24 @@ async function sendData() {
       addTerminalLine('Invalid hex string (must be even length)', 'error');
       return;
     }
-    const bytes = [];
+    dataArray = [];
     for (let i = 0; i < hexString.length; i += 2) {
-      bytes.push(parseInt(hexString.substr(i, 2), 16));
+      dataArray.push(parseInt(hexString.substr(i, 2), 16));
     }
-    data = Buffer.from(bytes);
   } else {
     // ASCII mode
     let textToSend = input;
     if (elements.addNewline.classList.contains('active')) {
       textToSend += '\r\n';
     }
-    data = Buffer.from(textToSend, 'utf8');
+    // Convert string to byte array
+    dataArray = Array.from(textToSend).map(c => c.charCodeAt(0));
   }
 
   try {
-    const result = await window.electronAPI.serial.writeData(data);
+    const result = await window.electronAPI.serial.writeData(dataArray);
     if (result.success) {
-      txBytes += data.length;
+      txBytes += dataArray.length;
       updateStats();
       
       if (elements.echoLocal.classList.contains('active')) {

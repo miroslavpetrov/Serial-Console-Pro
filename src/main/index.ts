@@ -1,9 +1,140 @@
-import { app, BrowserWindow, ipcMain } from 'electron';
+import { app, BrowserWindow, ipcMain, Menu } from 'electron';
 import * as path from 'path';
 import { SerialPort } from 'serialport';
 
 let mainWindow: BrowserWindow | null = null;
 let currentPort: SerialPort | null = null;
+
+function createMenu() {
+  const template: Electron.MenuItemConstructorOptions[] = [
+    {
+      label: 'File',
+      submenu: [
+        {
+          label: 'Clear Terminal',
+          accelerator: 'CmdOrCtrl+K',
+          click: () => {
+            if (mainWindow) {
+              mainWindow.webContents.send('menu:clear-terminal');
+            }
+          }
+        },
+        { type: 'separator' },
+        {
+          label: 'Quit',
+          accelerator: 'CmdOrCtrl+Q',
+          click: () => {
+            app.quit();
+          }
+        }
+      ]
+    },
+    {
+      label: 'Edit',
+      submenu: [
+        { role: 'undo' },
+        { role: 'redo' },
+        { type: 'separator' },
+        { role: 'cut' },
+        { role: 'copy' },
+        { role: 'paste' },
+        { role: 'selectAll' }
+      ]
+    },
+    {
+      label: 'View',
+      submenu: [
+        {
+          label: 'Autoscroll',
+          type: 'checkbox',
+          checked: true,
+          click: (menuItem) => {
+            if (mainWindow) {
+              mainWindow.webContents.send('menu:toggle-autoscroll', menuItem.checked);
+            }
+          }
+        },
+        {
+          label: 'Show Timestamps',
+          type: 'checkbox',
+          checked: false,
+          click: (menuItem) => {
+            if (mainWindow) {
+              mainWindow.webContents.send('menu:toggle-timestamps', menuItem.checked);
+            }
+          }
+        },
+        { type: 'separator' },
+        { role: 'reload' },
+        { role: 'toggleDevTools' }
+      ]
+    },
+    {
+      label: 'Settings',
+      submenu: [
+        {
+          label: 'Format',
+          submenu: [
+            {
+              label: 'ASCII',
+              type: 'radio',
+              checked: true,
+              click: () => {
+                if (mainWindow) {
+                  mainWindow.webContents.send('menu:set-format', 'ascii');
+                }
+              }
+            },
+            {
+              label: 'Hex',
+              type: 'radio',
+              checked: false,
+              click: () => {
+                if (mainWindow) {
+                  mainWindow.webContents.send('menu:set-format', 'hex');
+                }
+              }
+            }
+          ]
+        },
+        { type: 'separator' },
+        {
+          label: 'CR+LF',
+          type: 'checkbox',
+          checked: true,
+          click: (menuItem) => {
+            if (mainWindow) {
+              mainWindow.webContents.send('menu:toggle-newline', menuItem.checked);
+            }
+          }
+        },
+        {
+          label: 'Echo Local',
+          type: 'checkbox',
+          checked: false,
+          click: (menuItem) => {
+            if (mainWindow) {
+              mainWindow.webContents.send('menu:toggle-echo', menuItem.checked);
+            }
+          }
+        },
+        {
+          label: 'Enable Logging',
+          type: 'checkbox',
+          checked: false,
+          click: (menuItem) => {
+            if (mainWindow) {
+              mainWindow.webContents.send('menu:toggle-logging', menuItem.checked);
+            }
+          }
+        }
+      ]
+    }
+  ];
+
+  const menu = Menu.buildFromTemplate(template);
+  Menu.setApplicationMenu(menu);
+}
 
 function createWindow() {
   mainWindow = new BrowserWindow({
@@ -130,7 +261,21 @@ ipcMain.handle('serial:is-open', async () => {
   return currentPort ? currentPort.isOpen : false;
 });
 
+ipcMain.on('menu:update-checked', (event, menuLabel, itemLabel, checked) => {
+  const menu = Menu.getApplicationMenu();
+  if (!menu) return;
+
+  const menuItem = menu.items.find(item => item.label === menuLabel);
+  if (!menuItem || !menuItem.submenu) return;
+
+  const subItem = menuItem.submenu.items.find(item => item.label === itemLabel);
+  if (subItem) {
+    subItem.checked = checked;
+  }
+});
+
 app.whenReady().then(() => {
+  createMenu();
   createWindow();
 
   app.on('activate', () => {

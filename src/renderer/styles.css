@@ -27,6 +27,16 @@ body {
   height: 100vh;
 }
 
+.version-info {
+  position: fixed;
+  bottom: 8px;
+  left: 12px;
+  font-size: 11px;
+  color: var(--accent);
+  opacity: 0.6;
+  user-select: none;
+}
+
 .app-container {
   display: flex;
   flex-direction: column;

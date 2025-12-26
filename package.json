@@ -1,6 +1,6 @@
 {
   "name": "serial-console-pro",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "A beautiful serial console application",
   "main": "dist/main/index.js",
   "scripts": {

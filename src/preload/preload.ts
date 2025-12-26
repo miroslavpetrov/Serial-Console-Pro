@@ -6,7 +6,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
     listPorts: () => ipcRenderer.invoke('serial:list-ports'),
     openPort: (config: any) => ipcRenderer.invoke('serial:open-port', config),
     closePort: () => ipcRenderer.invoke('serial:close-port'),
-    writeData: (data: Buffer) => ipcRenderer.invoke('serial:write-data', data),
+    writeData: (data: number[]) => ipcRenderer.invoke('serial:write-data', Buffer.from(data)),
     isOpen: () => ipcRenderer.invoke('serial:is-open'),
     onDataReceived: (callback: (data: Buffer) => void) => {
       ipcRenderer.on('serial:data-received', (event, data) => callback(data));
@@ -17,5 +17,11 @@ contextBridge.exposeInMainWorld('electronAPI', {
     onPortClosed: (callback: () => void) => {
       ipcRenderer.on('serial:port-closed', () => callback());
     },
+  },
+  onMenuEvent: (channel: string, callback: (data?: any) => void) => {
+    ipcRenderer.on(channel, (event, data) => callback(data));
+  },
+  updateMenuChecked: (menuLabel: string, itemLabel: string, checked: boolean) => {
+    ipcRenderer.send('menu:update-checked', menuLabel, itemLabel, checked);
   },
 });
