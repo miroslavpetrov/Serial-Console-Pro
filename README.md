@@ -2,13 +2,15 @@
 
 A beautiful, professional cross-platform serial console application built with Electron and TypeScript. Monitor and communicate with serial devices through an elegant, modern interface.
 
-![Serial Console Pro](https://img.shields.io/badge/Electron-28.0-blue) ![TypeScript](https://img.shields.io/badge/TypeScript-5.3-blue)
+![Build & Release](https://github.com/miroslavpetrov/Serial-Console-Pro/actions/workflows/release.yml/badge.svg) ![Serial Console Pro](https://img.shields.io/badge/Electron-28.0-blue) ![TypeScript](https://img.shields.io/badge/TypeScript-5.3-blue) 
 
 ![Serial Console Pro](screenshots/serial-console-pro.png)
 
 ## Platform support
 
-- **macOS**
+### Prebuilt binaries are published on GitHub Releases for:
+
+- **macOS** 
 - **Linux**
 - **Windows**
 
