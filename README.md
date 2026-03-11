@@ -23,7 +23,7 @@ A beautiful, professional cross-platform serial console application built with E
 - **High performance** - Efficient data handling and rendering
 
 ### Serial Port Settings
-- **Baud Rate**: 300 - 921,600 baud (industry standard rates)
+- **Baud Rate**: 300 - 1,500,000 baud, including 1500000
 - **Data Bits**: 5, 6, 7, 8
 - **Stop Bits**: 1, 2
 - **Parity**: None, Even, Odd, Mark, Space
