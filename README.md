@@ -23,7 +23,7 @@ A beautiful, professional cross-platform serial console application built with E
 - **High performance** - Efficient data handling and rendering
 
 ### Serial Port Settings
-- **Baud Rate**: 300 - 921,600 baud (industry standard rates)
+- **Baud Rate**: Standard presets from 300 to 2,000,000 baud, plus custom rates
 - **Data Bits**: 5, 6, 7, 8
 - **Stop Bits**: 1, 2
 - **Parity**: None, Even, Odd, Mark, Space
@@ -37,7 +37,7 @@ A beautiful, professional cross-platform serial console application built with E
 
 ### Terminal Features
 - **Live Statistics** - Track RX/TX bytes and connection uptime
-- **Timestamps** - Every message timestamped for debugging
+- **Timestamps** - Optional timestamps for debugging
 - **Color-coded messages** - Visual distinction between sent/received data
 - **Clear terminal** - Fresh start with one click
 - **Auto-scroll** - Toggle automatic scrolling
@@ -87,7 +87,7 @@ serial-console-pro/
 ### Connecting to a Device
 
 1. **Select Port**: Choose your serial device from the dropdown
-2. **Configure Settings**: Set baud rate and other parameters
+2. **Configure Settings**: Choose a standard baud rate or select `Custom...` to enter any positive whole-number baud rate, then set the remaining port parameters
 3. **Click Connect**: Establish the connection
 4. **Start Communicating**: Send and receive data
 
@@ -113,7 +113,7 @@ serial-console-pro/
 
 - Incoming data appears with a **←** arrow in cyan
 - Outgoing data appears with a **→** arrow in yellow
-- All messages include timestamps
+- Enable timestamps from the UI or application menu when you need them
 - Color coding for errors, warnings, and info messages
 
 ## Security

@@ -5,6 +5,73 @@ import { SerialPort } from 'serialport';
 let mainWindow: BrowserWindow | null = null;
 let currentPort: SerialPort | null = null;
 
+type SerialParity = 'none' | 'even' | 'odd' | 'mark' | 'space';
+
+interface SerialPortConfig {
+  path: string;
+  baudRate: number;
+  dataBits: 5 | 6 | 7 | 8;
+  stopBits: 1 | 2;
+  parity: SerialParity;
+}
+
+function parsePositiveInteger(value: unknown): number | null {
+  if (typeof value === 'number') {
+    return Number.isSafeInteger(value) && value > 0 ? value : null;
+  }
+
+  if (typeof value === 'string' && /^\d+$/.test(value.trim())) {
+    const parsedValue = Number(value.trim());
+    return Number.isSafeInteger(parsedValue) && parsedValue > 0 ? parsedValue : null;
+  }
+
+  return null;
+}
+
+function validateSerialPortConfig(config: unknown): { success: true; config: SerialPortConfig } | { success: false; error: string } {
+  if (!config || typeof config !== 'object') {
+    return { success: false, error: 'Invalid serial port configuration' };
+  }
+
+  const candidate = config as Record<string, unknown>;
+  const path = typeof candidate.path === 'string' ? candidate.path.trim() : '';
+  const baudRate = parsePositiveInteger(candidate.baudRate);
+  const dataBits = parsePositiveInteger(candidate.dataBits);
+  const stopBits = parsePositiveInteger(candidate.stopBits);
+  const parity = candidate.parity;
+
+  if (!path) {
+    return { success: false, error: 'A serial port path is required' };
+  }
+
+  if (baudRate === null) {
+    return { success: false, error: 'Baud rate must be a positive whole number' };
+  }
+
+  if (dataBits !== 5 && dataBits !== 6 && dataBits !== 7 && dataBits !== 8) {
+    return { success: false, error: 'Data bits must be 5, 6, 7, or 8' };
+  }
+
+  if (stopBits !== 1 && stopBits !== 2) {
+    return { success: false, error: 'Stop bits must be 1 or 2' };
+  }
+
+  if (parity !== 'none' && parity !== 'even' && parity !== 'odd' && parity !== 'mark' && parity !== 'space') {
+    return { success: false, error: 'Parity setting is invalid' };
+  }
+
+  return {
+    success: true,
+    config: {
+      path,
+      baudRate,
+      dataBits,
+      stopBits,
+      parity,
+    },
+  };
+}
+
 function createMenu() {
   const template: Electron.MenuItemConstructorOptions[] = [
     {
@@ -183,23 +250,30 @@ ipcMain.handle('serial:list-ports', async () => {
 
 ipcMain.handle('serial:open-port', async (event, config) => {
   try {
+    const validation = validateSerialPortConfig(config);
+    if (!validation.success) {
+      return { success: false, error: validation.error };
+    }
+
+    const serialConfig = validation.config;
+
     if (currentPort && currentPort.isOpen) {
       await currentPort.close();
     }
 
     currentPort = new SerialPort({
-      path: config.path,
-      baudRate: config.baudRate,
-      dataBits: config.dataBits,
-      stopBits: config.stopBits,
-      parity: config.parity,
+      path: serialConfig.path,
+      baudRate: serialConfig.baudRate,
+      dataBits: serialConfig.dataBits,
+      stopBits: serialConfig.stopBits,
+      parity: serialConfig.parity,
       autoOpen: false,
     });
 
     return new Promise((resolve, reject) => {
       currentPort!.open((err) => {
         if (err) {
-          reject(err.message);
+          reject(new Error(err.message));
           return;
         }
 

@@ -11,10 +11,15 @@ let enableLogging = false;
 let logLines: string[] = [];
 let rxBuffer = ''; // Buffer for incomplete lines
 
+const CUSTOM_BAUD_RATE_VALUE = 'custom';
+let lastPresetBaudRate = '9600';
+
 // DOM Elements
 const elements = {
   portSelect: document.getElementById('portSelect') as HTMLSelectElement,
   baudRate: document.getElementById('baudRate') as HTMLSelectElement,
+  customBaudRateGroup: document.getElementById('customBaudRateGroup') as HTMLDivElement,
+  customBaudRate: document.getElementById('customBaudRate') as HTMLInputElement,
   dataBits: document.getElementById('dataBits') as HTMLSelectElement,
   stopBits: document.getElementById('stopBits') as HTMLSelectElement,
   parity: document.getElementById('parity') as HTMLSelectElement,
@@ -39,9 +44,49 @@ const elements = {
 
 // Initialize the application
 async function init() {
+  updateBaudRateControls();
   await refreshPorts();
   setupEventListeners();
   setupSerialListeners();
+}
+
+function parsePositiveInteger(value: string): number | null {
+  const trimmedValue = value.trim();
+  if (!/^\d+$/.test(trimmedValue)) {
+    return null;
+  }
+
+  const parsedValue = Number(trimmedValue);
+  if (!Number.isSafeInteger(parsedValue) || parsedValue <= 0) {
+    return null;
+  }
+
+  return parsedValue;
+}
+
+function isCustomBaudRateSelected(): boolean {
+  return elements.baudRate.value === CUSTOM_BAUD_RATE_VALUE;
+}
+
+function updateBaudRateControls() {
+  const customBaudRateSelected = isCustomBaudRateSelected();
+  elements.customBaudRateGroup.hidden = !customBaudRateSelected;
+
+  if (!customBaudRateSelected) {
+    lastPresetBaudRate = elements.baudRate.value;
+  } else if (!elements.customBaudRate.value.trim()) {
+    elements.customBaudRate.value = lastPresetBaudRate;
+  }
+
+  elements.customBaudRate.disabled = !customBaudRateSelected || isConnected;
+}
+
+function resolveBaudRate(): number | null {
+  if (isCustomBaudRateSelected()) {
+    return parsePositiveInteger(elements.customBaudRate.value);
+  }
+
+  return parsePositiveInteger(elements.baudRate.value);
 }
 
 // Refresh available serial ports
@@ -73,6 +118,29 @@ function setupEventListeners() {
   elements.sendBtn.addEventListener('click', sendData);
   elements.clearTerminal.addEventListener('click', clearTerminal);
   elements.toggleAutoscroll.addEventListener('click', toggleAutoscroll);
+  elements.baudRate.addEventListener('change', () => {
+    updateBaudRateControls();
+
+    if (isCustomBaudRateSelected()) {
+      elements.customBaudRate.focus();
+      elements.customBaudRate.select();
+    }
+  });
+  elements.customBaudRate.addEventListener('input', () => {
+    const sanitizedValue = elements.customBaudRate.value.replace(/\D+/g, '');
+    if (sanitizedValue !== elements.customBaudRate.value) {
+      elements.customBaudRate.value = sanitizedValue;
+    }
+  });
+  elements.customBaudRate.addEventListener('keydown', (event) => {
+    if (event.ctrlKey || event.metaKey || event.altKey) {
+      return;
+    }
+
+    if (event.key.length === 1 && !/\d/.test(event.key)) {
+      event.preventDefault();
+    }
+  });
 
   // Timestamp toggle
   elements.showTimestamps.addEventListener('click', () => {
@@ -195,9 +263,21 @@ async function connectToPort() {
     return;
   }
 
+  const baudRate = resolveBaudRate();
+  if (baudRate === null) {
+    addTerminalLine('Please enter a valid positive whole-number baud rate', 'error');
+    if (isCustomBaudRateSelected()) {
+      elements.customBaudRate.focus();
+      elements.customBaudRate.select();
+    } else {
+      elements.baudRate.focus();
+    }
+    return;
+  }
+
   const config = {
     path: portPath,
-    baudRate: parseInt(elements.baudRate.value),
+    baudRate,
     dataBits: parseInt(elements.dataBits.value),
     stopBits: parseInt(elements.stopBits.value),
     parity: elements.parity.value,
@@ -241,6 +321,7 @@ function handleConnect() {
   elements.sendBtn.disabled = false;
   elements.portSelect.disabled = true;
   elements.baudRate.disabled = true;
+  updateBaudRateControls();
   elements.dataBits.disabled = true;
   elements.stopBits.disabled = true;
   elements.parity.disabled = true;
@@ -262,6 +343,7 @@ function handleDisconnect() {
   elements.sendBtn.disabled = true;
   elements.portSelect.disabled = false;
   elements.baudRate.disabled = false;
+  updateBaudRateControls();
   elements.dataBits.disabled = false;
   elements.stopBits.disabled = false;
   elements.parity.disabled = false;
